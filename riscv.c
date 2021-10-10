@@ -11,7 +11,7 @@ void init_regs();
 bool interpret(char* instr);
 void write_read_demo();
 bool areSame(char* str1, char* str2);
-int initialCaseHandler(char* str);
+int caseHandler(char* str);
 int findRegNum(char* str);
 void print_regs();
 
@@ -41,8 +41,8 @@ int findRegNum(char* str){
 
   return  atoi(num);
 }
-
-int initialCaseHandler(char* str){
+//this will be able to handle the strings as a int so we can use them  in our swithc stateement 
+int caseHandler(char* str){
   if (areSame(str, "LW")) {return 0;}
   else if (areSame(str, "SW")) {return 1;}
   else if (areSame(str, "ADD")) {return 2;}
@@ -53,7 +53,7 @@ int initialCaseHandler(char* str){
   else
     return -1;
 }
-
+//this meethod helps my case handler help by letting me compare th given string
 bool areSame(char* str1, char* str2){
   char* temp1 = str1;
   char* temp2 = str2;
@@ -96,18 +96,20 @@ void init_regs(){
  * You may expect that a single, properly formatted RISC-V instruction string will be passed
  * as a parameter to this function.
  */
+ //this method is use so that we can properly interpert, it will use pointers 
 bool interpret(char* instr){
   char* textFile = "mem.txt";
-  char **pointerStorage;
-  pointerStorage = tokenize(instr, ' ');
+  char **pointerS;
+  pointerS = tokenize(instr, ' ');
   //print_all_tokens(pointerStorage); use for debugging purposes.
-  int caseNum = initialCaseHandler(pointerStorage[0]); // decides what case the instruction is.
+  int caseNum = initialCaseHandler(pointerS[0]); // decides what case the instruction is.
   switch(caseNum){
+    //this case is for LW,The lw instruction loads a word into a register from memory.
   case 0:
     printf("LW read");
-    char* saveToLW = *(pointerStorage+1);
+    char* saveToLW = *(pointerS+1);
     int saveToLWint = findRegNum(saveToLW);
-    char** memoryTokensLW = tokenize(*(pointerStorage+2), '('); // splits the main 3rd token in 2.
+    char** memoryTokensLW = tokenize(*(pointerS+2), '('); // splits the main 3rd token in 2.
     char** cleanMemoryLW = tokenize(*(memoryTokensLW+1),')'); // cleans the mem token to only reg.
 
     char* memoryRegLW = *cleanMemoryLW;
@@ -117,11 +119,13 @@ bool interpret(char* instr){
     int32_t readLW = read_address(addressLW, textFile);
     reg[saveToLWint] = readLW; // register is given whatever was read in addressLW
     break;
+    //this case is for SW,it will copy the data from a register to memory. The register is not changed. 
+
   case 1:
     printf("SW read");
-    char* saveFromSW = *(pointerStorage+1);
+    char* saveFromSW = *(pointerS+1);
     int saveFromSWint = findRegNum(saveFromSW);
-    char** memoryTokensSW = tokenize(*(pointerStorage+2), '(');
+    char** memoryTokensSW = tokenize(*(pointerS+2), '(');
     char** cleanMemorySW = tokenize(*(memoryTokensSW+1), ')');
     char* memoryRegSW = *cleanMemorySW;
     int memoryRegSWint = findRegNum(memoryRegSW);
@@ -131,11 +135,12 @@ bool interpret(char* instr){
     int32_t write = write_address(data_to_writeSW, addressSW, textFile);
     
     break;
+    //Adds the first operand (destination operand) and the second operand (source operand) and stores the result in the destination operand.
   case 2:
     printf("ADD read");
-    char* saveTo = *(pointerStorage+1);
-    char* firstOperand = *(pointerStorage+2);
-    char* secondOperand = *(pointerStorage+3);
+    char* saveTo = *(pointerS+1);
+    char* firstOperand = *(pointerS+2);
+    char* secondOperand = *(pointerS+3);
 
     int saveToReg = findRegNum(saveTo);
     int firstReg = findRegNum(firstOperand);
@@ -144,52 +149,17 @@ bool interpret(char* instr){
     reg[saveToReg] = reg[firstReg] + reg[secReg];
     printf("%d", reg[saveToReg]);
     break;
+    //This case is for ADDI instruction. Addi is used to  adds the immediate specified in the instruction to a value in a register
   case 3:
     printf("ADDI read");
-    char* saveToADDI = *(pointerStorage+1);
-    char* addTo = *(pointerStorage+2);
-    int add = atoi(*(pointerStorage+3));
+    char* saveToADDI = *(pointerS+1);
+    char* addTo = *(pointerS+2);
+    int add = atoi(*(pointerS+3));
 
     int saveToADDIint = findRegNum(saveToADDI);
     int addToint = findRegNum(addTo);
 
     reg[saveToADDIint] = reg[addToint] + add;
-    break;
-  case 4:
-    printf("AND read");
-    char* saveToAnd = *(pointerStorage+1);
-    char* firstOperandAnd = *(pointerStorage+2);
-    char* secondOperandAnd = *(pointerStorage+3);
-
-    int saveToRegAnd = findRegNum(saveToAnd);
-    int firstRegAnd = findRegNum(firstOperandAnd);
-    int secRegAnd = findRegNum(secondOperandAnd);
-
-    reg[saveToRegAnd] = reg[firstRegAnd] & reg[secRegAnd];
-    break;
-  case 5:
-    printf("OR read");
-    char* saveToOr = *(pointerStorage+1);
-    char* firstOperandOr = *(pointerStorage+2);
-    char* secondOperandOr = *(pointerStorage+3);
-
-    int saveToRegOr = findRegNum(saveToOr);
-    int firstRegOr = findRegNum(firstOperandOr);
-    int secRegOr = findRegNum(secondOperandOr);
-
-    reg[saveToRegOr] = reg[firstRegOr] | reg[secRegOr];
-    break;
-  case 6:
-    printf("XOR read");
-    char* saveToXor = *(pointerStorage+1);
-    char* firstOperandXor = *(pointerStorage+2);
-    char* secondOperandXor = *(pointerStorage+3);
-
-    int saveToRegXor = findRegNum(saveToXor);
-    int firstRegXor = findRegNum(firstOperandXor);
-    int secRegXor = findRegNum(secondOperandXor);
-
-    reg[saveToRegXor] = reg[firstRegXor] ^ reg[secRegXor];
     break;
   default:
     printf("ERROR");
@@ -208,6 +178,7 @@ int main(){
 
 	char input[1000]; // User input can only be 100 chars long.
 	printf("Enter 'x' to quit.\n");
+  //while loop so it can do the functions over and oveer until user press x, therefore it breaks
 	while(1){
 	  printf("Input: ");
 	  fgets(input, sizeof(input), stdin);
