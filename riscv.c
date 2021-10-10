@@ -102,7 +102,7 @@ bool interpret(char* instr){
   char **pointerS;
   pointerS = tokenize(instr, ' ');
   //print_all_tokens(pointerStorage); use for debugging purposes.
-  int caseNum = initialCaseHandler(pointerS[0]); // decides what case the instruction is.
+  int caseNum = caseHandler(pointerS[0]); // decides what case the instruction is.
   switch(caseNum){
     //this case is for LW,The lw instruction loads a word into a register from memory.
   case 0:
